@@ -62,7 +62,51 @@ const updateBlogFormDb = async (
   return updatedBlog;
 };
 
+const deleteBlogFormDB = async (blogId: string, user: JwtPayload) => {
+  const email = user.email;
+  const blog = await Blog.findById(blogId)
+    .select('_id title content author')
+    .populate('author', '_id email name role');
+  if (!blog) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Blog not found');
+  }
+
+  if (!isPopulatedAuthor(blog.author)) {
+    throw new Error('You are not authorized to delete this blog');
+  }
+  if (blog.author?.email !== email) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'You are not authorized to delete this blog',
+    );
+  }
+  const result = await Blog.findByIdAndDelete(blogId);
+  return result;
+};
+
+const getAllBlogsFormDb = async (querys: any) => {
+  const { search, sortBy = 'createdAt', sortOrder = 'desc', filter } = querys;
+  const query: any = {};
+  if (search) {
+    const regex = new RegExp(search as string, 'i');
+    query.$or = [{ title: regex }, { content: regex }];
+  }
+  if (filter) {
+    query.author = filter;
+  }
+  const sort: Record<string, 1 | -1> = {
+    [sortBy as string]: sortOrder === 'asc' ? 1 : -1,
+  };
+  const blogs = await Blog.find(query)
+    .sort(sort)
+    .select('_id title content author')
+    .populate('author', '_id email name role');
+  return blogs;
+};
+
 export const BlogService = {
   createBlogIntoDb,
   updateBlogFormDb,
+  deleteBlogFormDB,
+  getAllBlogsFormDb,
 };
