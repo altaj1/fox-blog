@@ -11,13 +11,15 @@ import User from '../modules/user/user.model';
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
-    // console.log(token);
+
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
+    const extractedToken = token.split(' ')[1]; // Extract the token after "Bearer"
+    // console.log(extractedToken);
     // checking if the given token is valid
     const decoded = jwt.verify(
-      token,
+      extractedToken,
       config.jwt_access_secret as string,
     ) as JwtPayload;
 

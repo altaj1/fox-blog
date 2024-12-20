@@ -19,14 +19,10 @@ router.get('/', BlogController.getAllBlogs);
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.user, USER_ROLE.admin),
+  auth(USER_ROLE.user),
   validateRequest(updateBlogValidationSchema),
   BlogController.updateBlog,
 );
-router.delete(
-  '/:id',
-  auth(USER_ROLE.user, USER_ROLE.admin),
-  BlogController.deleteBlog,
-);
+router.delete('/:id', auth(USER_ROLE.user), BlogController.deleteBlog);
 
 export const BlogRoutes = router;
