@@ -16,7 +16,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
     try {
       const token = req.headers.authorization;
 
-      // Check if token exists and starts with "Bearer"
       if (!token || !token.startsWith('Bearer ')) {
         throw new AppError(
           httpStatus.UNAUTHORIZED,
@@ -24,7 +23,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
         );
       }
 
-      // Extract the token
       const extractedToken = token.split(' ')[1];
 
       // Verify and decode the token
@@ -35,23 +33,19 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
       const { role, email } = decoded;
 
-      // Verify if the user exists
       const user = await User.isUserExistsByEmail(email);
       if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
       }
 
-      // Check if the user is deleted
       if (user.isDeleted) {
         throw new AppError(httpStatus.FORBIDDEN, 'User account is deleted!');
       }
 
-      // Check if the user is blocked
       if (user.isBlocked) {
         throw new AppError(httpStatus.FORBIDDEN, 'User account is blocked!');
       }
 
-      // Check for role-based access if roles are required
       if (requiredRoles.length && !requiredRoles.includes(role)) {
         throw new AppError(
           httpStatus.FORBIDDEN,
@@ -59,10 +53,8 @@ const auth = (...requiredRoles: TUserRole[]) => {
         );
       }
 
-      // Attach user details to the request object
       req.user = decoded;
 
-      // Proceed to the next middleware or route handler
       next();
     } catch (error) {
       if (
