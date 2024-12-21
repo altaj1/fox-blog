@@ -7,7 +7,7 @@ const blockUserIntoDb = async (userId: string) => {
   const user = await User.findByIdAndUpdate(
     userId,
     { isBlocked: true },
-    { new: true }, // Return the updated document
+    { new: true },
   );
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');

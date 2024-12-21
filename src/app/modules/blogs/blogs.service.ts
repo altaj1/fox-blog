@@ -8,8 +8,6 @@ import httpStatus from 'http-status';
 import { isPopulatedAuthor } from './blog.utils';
 
 const createBlogIntoDb = async (user: JwtPayload, payload: TBlog) => {
-  //   console.log({ user });
-  //   console.log({ payload });
   const userData = await User.findOne({ email: user?.email });
   if (!userData) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User does not exist');
